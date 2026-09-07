@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Slipstream</title>
+    <meta
+      name="description"
+      content="Slipstream — from GitHub to Vercel in one current."
+    />
+    <meta name="theme-color" content="#0f1612" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,700&family=Outfit:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0f1612;
+        --surface: #17211c;
+        --fg: #e8ebe4;
+        --muted: #8b948c;
+        --primary: #d4a574;
+        --border: #2a3830;
+        --ink: #0a0e0c;
+        --sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+        --serif: "Fraunces", ui-serif, Georgia, serif;
+        --shadow: 0 0 0 1px rgba(232, 235, 228, 0.08);
+        --shadow-hover: 0 0 0 1px rgba(212, 165, 116, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--sans);
+        overflow-x: hidden;
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      h1,
+      h2 {
+        text-wrap: balance;
+      }
+
+      p {
+        text-wrap: pretty;
+      }
+
+      .spine {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 30;
+        width: 3px;
+        height: 100%;
+        background: var(--primary);
+        pointer-events: none;
+      }
+
+      .grain {
+        pointer-events: none;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        opacity: 0.05;
+        mix-blend-mode: overlay;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .wordmark {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+      }
+
+      .live {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--primary);
+      }
+
+      .live-dot {
+        position: relative;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      .live-dot::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: var(--primary);
+        animation: live-pulse 2.4s ease-out infinite;
+      }
+
+      .hero {
+        display: grid;
+        gap: 3.5rem;
+        padding: 1.5rem 1.5rem 3rem;
+      }
+
+      .kicker {
+        margin: 0 0 1.25rem;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: var(--serif);
+        font-size: clamp(2.75rem, 8vw, 4.5rem);
+        font-weight: 500;
+        font-style: italic;
+        line-height: 1.04;
+      }
+
+      .lede {
+        margin: 2rem 0 0;
+        max-width: 28rem;
+        font-size: 1.0625rem;
+        font-weight: 300;
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .lede em {
+        color: var(--primary);
+        font-family: var(--serif);
+        font-style: italic;
+        font-weight: 400;
+      }
+
+      .pipeline {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .pipeline li {
+        display: grid;
+        grid-template-columns: 3.25rem 1fr;
+        gap: 0.75rem;
+        padding: 1.25rem 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .pipeline li:last-child {
+        border-bottom: 0;
+      }
+
+      .num {
+        font-family: var(--serif);
+        font-size: 0.875rem;
+        font-style: italic;
+        color: var(--primary);
+      }
+
+      .pipeline h2 {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+      }
+
+      .pipeline p {
+        margin: 0.4rem 0 0;
+        font-size: 0.875rem;
+        font-weight: 300;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+
+      .cards {
+        display: grid;
+        gap: 0.75rem;
+        padding: 0 1.5rem 4rem;
+      }
+
+      .card {
+        display: flex;
+        min-height: 7.5rem;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.25rem;
+        border-radius: 1rem;
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        transition: box-shadow 200ms ease-out, transform 150ms ease-out;
+      }
+
+      .card:hover {
+        box-shadow: var(--shadow-hover);
+      }
+
+      .card:active {
+        transform: scale(0.96);
+      }
+
+      .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+      }
+
+      .icon {
+        display: flex;
+        width: 2.5rem;
+        height: 2.5rem;
+        align-items: center;
+        justify-content: center;
+        border-radius: 0.5rem;
+        background: var(--ink);
+        color: var(--primary);
+      }
+
+      .arrow {
+        width: 1rem;
+        height: 1rem;
+        color: var(--muted);
+        transition: transform 200ms ease-out, color 200ms ease-out;
+      }
+
+      .card:hover .arrow {
+        color: var(--primary);
+        transform: translate(2px, -2px);
+      }
+
+      .card .eyebrow {
+        margin: 1.5rem 0 0;
+        font-size: 10px;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      .card .title {
+        margin: 0.4rem 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-family: var(--serif);
+        font-size: 1.125rem;
+        font-style: italic;
+      }
+
+      .card .hint {
+        margin: 0.25rem 0 0;
+        font-size: 0.75rem;
+        font-weight: 300;
+        color: var(--muted);
+      }
+
+      footer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 2rem 1.5rem;
+        border-top: 1px solid var(--border);
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+
+      @media (min-width: 768px) {
+        header,
+        .hero,
+        .cards,
+        footer {
+          padding-left: 3rem;
+          padding-right: 3rem;
+        }
+
+        .hero {
+          grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+          gap: 4rem;
+          padding-top: 2.5rem;
+        }
+
+        .cards {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        footer {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      @media (min-width: 1024px) {
+        header,
+        .hero,
+        .cards,
+        footer {
+          padding-left: 4rem;
+          padding-right: 4rem;
+        }
+      }
+
+      .enter {
+        animation: fade-up 700ms cubic-bezier(0.2, 0, 0, 1) both;
+      }
+      .enter-2 {
+        animation-delay: 90ms;
+      }
+      .enter-3 {
+        animation-delay: 180ms;
+      }
+      .enter-4 {
+        animation-delay: 270ms;
+      }
+      .enter-5 {
+        animation-delay: 360ms;
+      }
+
+      @keyframes live-pulse {
+        from {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        to {
+          transform: scale(2.4);
+          opacity: 0;
+        }
+      }
+
+      @keyframes fade-up {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+          filter: blur(4px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+          filter: blur(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .live-dot::after,
+        .enter,
+        .enter-2,
+        .enter-3,
+        .enter-4,
+        .enter-5 {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="spine" aria-hidden="true"></div>
+
+    <header class="enter">
+      <div class="brand">
+        <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#0a0e0c" />
+          <rect
+            x="0.5"
+            y="0.5"
+            width="31"
+            height="31"
+            rx="7.5"
+            fill="none"
+            stroke="#2a3830"
+          />
+          <path
+            d="M7 21c4.2-9 13.8-9 18 0"
+            fill="none"
+            stroke="#d4a574"
+            stroke-width="2.2"
+            stroke-linecap="round"
+          />
+          <path
+            d="M7 14.5c4.2-9 13.8-9 18 0"
+            fill="none"
+            stroke="#d4a574"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            opacity="0.45"
+          />
+        </svg>
+        <span class="wordmark">Slipstream</span>
+      </div>
+      <p class="live">
+        <span class="live-dot" aria-hidden="true"></span>
+        Live
+      </p>
+    </header>
+
+    <section class="hero">
+      <div class="enter enter-2">
+        <p class="kicker">GitHub · Vercel</p>
+        <h1>From the bench<br />to the edge.</h1>
+        <p class="lede">
+          <em>Ra khơi.</em> This project left the editor, landed in GitHub, and
+          is serving from Vercel — one current, no extra ceremony.
+        </p>
+      </div>
+
+      <ol class="pipeline enter enter-3">
+        <li>
+          <span class="num">01</span>
+          <div>
+            <h2>Origin</h2>
+            <p>
+              A public GitHub repository is born — the source of truth for every
+              push that follows.
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="num">02</span>
+          <div>
+            <h2>Source</h2>
+            <p>
+              The first commit lands on main: markup, mark, and a readme with
+              nowhere left to hide.
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="num">03</span>
+          <div>
+            <h2>Link</h2>
+            <p>
+              Vercel attaches to the repo. From here, every push is a
+              deployment — no ceremony.
+            </p>
+          </div>
+        </li>
+        <li>
+          <span class="num">04</span>
+          <div>
+            <h2>Edge</h2>
+            <p>
+              Production is live on the network. The current has somewhere to
+              go.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="cards enter enter-4">
+      <a
+        class="card"
+        href="https://github.com/AnthonyHuynh1989/slipstream"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <div class="card-top">
+          <span class="icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" x2="6" y1="3" y2="15" />
+              <circle cx="18" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <path d="M18 9a9 9 0 0 1-9 9" />
+            </svg>
+          </span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 7h10v10" />
+            <path d="M7 17 17 7" />
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">Repository</p>
+          <p class="title">AnthonyHuynh1989/slipstream</p>
+          <p class="hint">Source of truth on GitHub</p>
+        </div>
+      </a>
+
+      <a class="card" href="https://slipstream.vercel.app" target="_blank" rel="noreferrer">
+        <div class="card-top">
+          <span class="icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+              <path d="M2 12h20" />
+            </svg>
+          </span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 7h10v10" />
+            <path d="M7 17 17 7" />
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">Production</p>
+          <p class="title">slipstream.vercel.app</p>
+          <p class="hint">Vercel edge, hobby team</p>
+        </div>
+      </a>
+
+      <a class="card" href="https://slipstream.vercel.app" target="_blank" rel="noreferrer">
+        <div class="card-top">
+          <span class="icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+              <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
+              <circle cx="12" cy="12" r="2" />
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
+              <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+            </svg>
+          </span>
+          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M7 7h10v10" />
+            <path d="M7 17 17 7" />
+          </svg>
+        </div>
+        <div>
+          <p class="eyebrow">Team</p>
+          <p class="title">Antonio's projects</p>
+          <p class="hint">antonio-huynh-projects</p>
+        </div>
+      </a>
+    </section>
+
+    <footer class="enter enter-5">
+      <p>Antonio Vương · Ho Chi Minh City</p>
+      <p>Pushed to main · Deployed on Vercel</p>
+    </footer>
+  </body>
+</html>
